@@ -96,7 +96,7 @@ public class Main {
     private static double pricePerKiloWattHour = 37;
     
   public static void main(String[] args) throws IOException, ClassNotFoundException, SQLException, URISyntaxException {
-	  Class.forName("com.mysql.jdbc.Driver");
+	  //Class.forName("com.mysql.jdbc.Driver");
 	  Path currentRelativePath = Paths.get("");
 	  String currentPath = currentRelativePath.toAbsolutePath().toString();
 	  hasIntelProcessor = checkIfProcessorIsIntel();
@@ -113,15 +113,10 @@ public class Main {
 		  JOptionPane.showMessageDialog(null, "energy_usage.db is not found at location: "+currentPath, "Error", JOptionPane.ERROR_MESSAGE);
 		  System.exit(0);
 	  }
-	  /*connect = DriverManager
-              .getConnection("jdbc:mysql://localhost:3306/energy_usage?"
-                      + "autoReconnect=true&useSSL=false&user=root&password=Laci19930401");
-	  statement = connect.createStatement();*/
 	  
 	  String url = "jdbc:sqlite:"+currentPath+"/energy_usage.db";
 	  connect = DriverManager.getConnection(url);
 	  statement = connect.createStatement();
-	  //hasIntelProcessor = false;
 	  /*
 	   * 1,kezdeni kell valamit a hasIntelProcessor-ral, hogy csak akkor
 	   * legyenek power értékek,ha hasIntelProcessor true KÉSZ
@@ -134,11 +129,6 @@ public class Main {
 	   * 7, portable database KÉSZ
 	   * 8, UX szempontok összegyűjtése/hozzáadása
 	   */
-	  /*preparedStatement = connect.prepareStatement("insert into `ok` (`num`)"
-			  +" values (?)");
-	  preparedStatement.setDouble(1, 100);
-	  preparedStatement.executeUpdate();*/
-	  //addApplicationsWithValuesForDefaultAlerts();
 	  startWelcomeGUIDnD();
   }
   
@@ -307,7 +297,7 @@ public class Main {
   }
   
   public static double round(double value) {
-	    if (Double.isNaN(value)) {
+	    if (Double.isNaN(value) || value == Double.POSITIVE_INFINITY) {
 	    	return value;
 	    }
 	  	BigDecimal bd = new BigDecimal(value);
@@ -316,7 +306,7 @@ public class Main {
   }
   
   public static double roundFiveDigits(double value) {
-	  	if (Double.isNaN(value)) {
+	  	if (Double.isNaN(value) || value == Double.POSITIVE_INFINITY) {
 	    	return value;
 	    }
 	    BigDecimal bd = new BigDecimal(value);
@@ -416,7 +406,7 @@ public class Main {
 			}
 		});
 	    c.gridx = 2;
-	    if (hasIntelProcessor) {
+	    if (hasIntelProcessor && isAppropriateAppInstalled) {
 		    panelForBtn.add(consumptionBtn,c);
 	    }
 	    JButton endBtn = new JButton("End Process");
@@ -444,7 +434,7 @@ public class Main {
 		  	    	  PowerData powerData = getPowerData();
 		  	    	  List<ProcessData> processData = createBasicProcessDataArray(numberOfLogicalProcessors);
 		              publish(processData);
-		  	    	  long durationInMiliSec = System.nanoTime() / 1000000 - start;
+		              long durationInMiliSec = System.nanoTime() / 1000000 - start;
 		  	    	  List<String> sumEnergyDataPerProcess = getSumEnergyDataPerProcessFromDatabase(powerData,processData,durationInMiliSec);
 			  	      consumptionPanel.removeAll();
 			  	      JPanel subConsumptionPanel = new JPanel(new GridBagLayout());
@@ -1222,7 +1212,7 @@ public class Main {
 			}
 		});
 	    c.gridx = 1;
-	    if (hasIntelProcessor) {
+	    if (hasIntelProcessor && isAppropriateAppInstalled) {
 		    panelForBtn.add(consumptionBtn,c);
 	    }
 	    panel.add(panelForBtn,BorderLayout.PAGE_END);
@@ -2068,8 +2058,8 @@ public class Main {
         				  id = Integer.parseInt(lineParts[1].trim());
         			  }
         			  if (counter == 5) {
-        				  if (lineParts[1].contains("ÿ")) {
-        					  memUsage = Double.parseDouble(lineParts[1].trim().replaceAll("ÿ", "").split(" ")[0]) / 1024;
+        				  if (lineParts[1].contains("�")) {
+        					  memUsage = Double.parseDouble(lineParts[1].trim().replaceAll("�", "").split(" ")[0]) / 1024;
         				  } else {
         					  memUsage = Double.parseDouble(lineParts[1].trim().replaceAll(",", "").split(" ")[0]) / 1024;
         				  }
@@ -2213,8 +2203,8 @@ public class Main {
         				  id = Integer.parseInt(lineParts[1].trim());
         			  }
         			  if (counter == 5) {
-        				  if (lineParts[1].contains("ÿ")) {
-        					  memUsage = Double.parseDouble(lineParts[1].trim().replaceAll("ÿ", "").split(" ")[0]) / 1024;
+        				  if (lineParts[1].contains("�")) {
+        					  memUsage = Double.parseDouble(lineParts[1].trim().replaceAll("�", "").split(" ")[0]) / 1024;
         				  } else {
         					  memUsage = Double.parseDouble(lineParts[1].trim().replaceAll(",", "").split(" ")[0]) / 1024;
         				  }
