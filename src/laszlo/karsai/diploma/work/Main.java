@@ -91,6 +91,7 @@ public class Main {
     private static String analyzeName = "Analyze Popular Process Data";
     private static int counterForMock = 0;
     private static Boolean hasIntelProcessor = false;
+    private static Boolean isAppropriateAppInstalled = false;
     private static int sleepTimeInSeconds = 3;
     private static double pricePerKiloWattHour = 37;
     
@@ -99,6 +100,7 @@ public class Main {
 	  Path currentRelativePath = Paths.get("");
 	  String currentPath = currentRelativePath.toAbsolutePath().toString();
 	  hasIntelProcessor = checkIfProcessorIsIntel();
+	  isAppropriateAppInstalled = checkIfAppropriateAppIsInstalled();
 	  if (hasIntelProcessor) {
 		  File file = new File("PowerLog3.0.exe");
 		  if (!file.exists()) {
@@ -225,7 +227,7 @@ public class Main {
   }
   
   public static PowerData getPowerData() throws IOException, URISyntaxException {
-	  if (!hasIntelProcessor) {
+	  if (!hasIntelProcessor || !isAppropriateAppInstalled) {
 		  return null;
 	  }
 	  Process process = new ProcessBuilder("PowerLog3.0.exe","-duration","1","-verbose").start();
@@ -248,6 +250,22 @@ public class Main {
 		  sumOfPower += powerDataList.get(i).getPowerInWatt();
 	  }
 	  return new PowerData(round(sumOfPower / listElementCount));
+  }
+  
+  public static Boolean checkIfAppropriateAppIsInstalled() throws IOException, URISyntaxException {
+	  if (!hasIntelProcessor) {
+		  return false;
+	  }
+	  Process process = new ProcessBuilder("PowerLog3.0.exe","-duration","1","-verbose").start();
+      InputStream stdout = process.getInputStream ();
+	  BufferedReader reader = new BufferedReader (new InputStreamReader(stdout));
+	  String line;
+	  while ((line = reader.readLine ()) != null) {
+		  if (line.contains("Error")) {
+			  return false;
+		  }
+	  }
+	  return true;
   }
   
   public static Boolean checkIfProcessorIsIntel() throws NumberFormatException, IOException {
@@ -1893,7 +1911,7 @@ public class Main {
 				  preparedStatement.setString(1,type);
 				  preparedStatement.setString(2, parts[0]);
 				  preparedStatement.setDouble(3, limit);
-				  delayDueToHistory = commonToDoIfAlertRequiredAndGetYScalePos(panel, preparedStatement, delayDueToHistory, parts, c, unit, sumEnergyDataPerProcess, 7 * 24 * 60 * 60, "1 week");
+				  delayDueToHistory = commonToDoIfAlertRequiredAndGetYScalePos(panel, preparedStatement, delayDueToHistory, parts, c, unit, sumEnergyDataPerProcess, 30 * 60, "30 minutes");
 				  preparedStatement = connect.prepareStatement("insert into `alerts` (`type`,`time`,`name`,`value`,`limit`)"
 						  +" values (?,?,?,?,?)");
 				  preparedStatement.setString(1, type);
